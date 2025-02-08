@@ -1,0 +1,12 @@
+ChangeDisplaySettings
+EnumDisplaySettings
+
+GetDisplayConfigBufferSizes
+QueryDisplayConfig
+DisplayConfigGetDeviceInfo
+DisplayConfigSetDeviceInfo
+
+DISPLAYCONFIG_PATH_TARGET_INFO
+DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO
+DISPLAYCONFIG_MODE_INFO
+DISPLAYCONFIG_SET_ADVANCED_COLOR_STATE
