@@ -26,7 +26,7 @@ namespace MonitorResetTool
         }
 
         // 获取显示器的 HDR 状态
-        private static Status GetDisplayHDRStatus(ref DISPLAYCONFIG_MODE_INFO mode)
+        private static HDRStatus GetDisplayHDRStatus(ref DISPLAYCONFIG_MODE_INFO mode)
         {
             DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO getColorInfo = new();
 
@@ -37,37 +37,37 @@ namespace MonitorResetTool
             getColorInfo.header.id = mode.id;
 
             if (PInvoke.DisplayConfigGetDeviceInfo(ref getColorInfo.header) != (int)WIN32_ERROR.NO_ERROR)
-                return Status.Unsupported;
+                return HDRStatus.Unsupported;
 
             if (!getColorInfo.Anonymous.Anonymous.advancedColorSupported)
-                return Status.Unsupported;
+                return HDRStatus.Unsupported;
 
-            return getColorInfo.Anonymous.Anonymous.advancedColorEnabled ? Status.On : Status.Off;
+            return getColorInfo.Anonymous.Anonymous.advancedColorEnabled ? HDRStatus.On : HDRStatus.Off;
         }
 
         // 获取所有显示器的 HDR 状态
-        public static Status GetWindowsHDRStatus()
+        public static HDRStatus GetWindowsHDRStatus()
         {
             bool anySupported = false;
             bool anyEnabled = false;
 
             ForEachDisplay(mode =>
                 {
-                    Status displayStatus = GetDisplayHDRStatus(ref mode);
-                    anySupported |= displayStatus != Status.Unsupported;
-                    anyEnabled |= displayStatus == Status.On;
+                    HDRStatus displayStatus = GetDisplayHDRStatus(ref mode);
+                    anySupported |= displayStatus != HDRStatus.Unsupported;
+                    anyEnabled |= displayStatus == HDRStatus.On;
                 });
 
             if (anySupported)
-                return anyEnabled ? Status.On : Status.Off;
+                return anyEnabled ? HDRStatus.On : HDRStatus.Off;
             else
-                return Status.Unsupported;
+                return HDRStatus.Unsupported;
         }
 
         // 设置单个显示器的 HDR 状态
-        private static Status? SetDisplayHDRStatus(ref DISPLAYCONFIG_MODE_INFO mode, bool enable)
+        private static HDRStatus? SetDisplayHDRStatus(ref DISPLAYCONFIG_MODE_INFO mode, bool enable)
         {
-            if (GetDisplayHDRStatus(ref mode) == Status.Unsupported)
+            if (GetDisplayHDRStatus(ref mode) == HDRStatus.Unsupported)
                 return null;
 
             DISPLAYCONFIG_SET_ADVANCED_COLOR_STATE setColorState = new();
@@ -85,9 +85,9 @@ namespace MonitorResetTool
         }
 
         // 设置所有显示器的 HDR 状态
-        public static Status? SetWindowsHDRStatus(bool enable)
+        public static HDRStatus? SetWindowsHDRStatus(bool enable)
         {
-            Status? status = null;
+            HDRStatus? status = null;
 
             ForEachDisplay(mode =>
             {
@@ -97,19 +97,19 @@ namespace MonitorResetTool
                 if (status == null)
                     status = new_status;
                 else
-                    status = (Status)(Math.Max((int)status, (int)new_status));
+                    status = (HDRStatus)(Math.Max((int)status, (int)new_status));
             });
 
             return status;
         }
 
         // 切换所有显示器的 HDR 状态
-        public static Status? ToggleHDRStatus()
+        public static HDRStatus? ToggleHDRStatus()
         {
             var status = GetWindowsHDRStatus();
-            if (status == Status.Unsupported)
-                return Status.Unsupported;
-            return SetWindowsHDRStatus(status == Status.Off ? true : false);
+            if (status == HDRStatus.Unsupported)
+                return HDRStatus.Unsupported;
+            return SetWindowsHDRStatus(status == HDRStatus.Off ? true : false);
         }
     }
 }
